@@ -29,10 +29,18 @@ public class TrackStore {
 
     // GETTERS AND SETTERS
 
+    /**
+     * Returns the ArrayList of Tracks.
+     * @return
+     */
     public ArrayList<Track> getTracks() {
         return tracks;
     }
 
+    /**
+     * Sets the ArrayList of Tracks.
+     * @param tracks
+     */
     public void setTracks(ArrayList<Track> tracks) {
         this.tracks = tracks;
     }

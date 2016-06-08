@@ -78,7 +78,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * The TrackStore to store the tracked locations inside.
      */
-    private TrackStore locStore = new TrackStore();
+    private TrackStore trackStore = new TrackStore();
 
     /**
      * TODO : KEIN PLAN
@@ -201,13 +201,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         i.putExtra(Intent.EXTRA_SUBJECT, "subject of email");
         // CREATE THE STRING TO PUT INSIDE THE EMAIL
         String mailText = "";
-        for(int a=0;a < this.locStore.getTracks().size(); a++){
+        for(int a = 0; a < this.trackStore.getTracks().size(); a++){
             mailText = mailText + "Track : " + a + "\n";
-            for(int b = 0; b < this.locStore.getTracks().get(a).getLatLngs().size(); b++){
-                mailText = mailText + "lat=" + this.locStore.getTracks().get(a).getLatLngs().get(b).latitude + " ";
-                mailText = mailText + "lon=" + this.locStore.getTracks().get(a).getLatLngs().get(b).longitude + " ";
-                mailText = mailText + "time=" + this.locStore.getTracks().get(a).getLatLngs().get(b).toString() + " ";
-                mailText = mailText + "time=" + this.locStore.getTracks().get(a).getLatLngs().get(b).toString() + "\n";
+            for(int b = 0; b < this.trackStore.getTracks().get(a).getLatLngs().size(); b++){
+                mailText = mailText + "lat=" + this.trackStore.getTracks().get(a).getLatLngs().get(b).latitude + " ";
+                mailText = mailText + "lon=" + this.trackStore.getTracks().get(a).getLatLngs().get(b).longitude + " ";
+                mailText = mailText + "time=" + this.trackStore.getTracks().get(a).getLatLngs().get(b).toString() + " ";
+                mailText = mailText + "time=" + this.trackStore.getTracks().get(a).getLatLngs().get(b).toString() + "\n";
             }
         }
         i.putExtra(Intent.EXTRA_TEXT, mailText);
@@ -316,14 +316,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * Saves the Track t to the location store.
-     * @param t
-     */
-    private void saveTrack(Track t) {
-        this.locStore.getTracks().add(t);
-    }
-
-    /**
      * Starts updates of the location.
      */
     protected void startLocationUpdates() {
@@ -405,6 +397,54 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.i(TAG, "Connection failed!" + connectionResult.getErrorCode());
     }
 
+    /**
+     * Shows the tracked points of a Track t as a polyline.
+     * @param t
+     */
+    public void showtrackedPoints(Track t){
+        // CREATE POLYLINE OPTIONS
+        PolylineOptions polOpt = new PolylineOptions();
+        // SET THE COLOR
+        polOpt.color(Color.BLACK);
+        // FOR THE SIZE OF THE SAVED LATLNG
+        for(int a = 0; a < t.getLatLngs().size(); a++){
+            // ADD BASEPOINT TO THE POLYLINE
+            polOpt.add(t.getLatLngs().get(a));
+        }
+        // ADD POLYLINE TO THE MAP
+        this.mMap.addPolyline(polOpt);
+    }
+
+    /**
+     * Removes all markers etc from the map.
+     */
+    public void clearMap(){
+        this.mMap.clear();
+    }
+
+    /**
+     * Saves the Track t to the location store.
+     * @param t
+     */
+    private void saveTrack(Track t) {
+        // SAVE THE TRACK TO THE TRACKSTORE
+        this.trackStore.getTracks().add(t);
+        // EMPTY THE TRACK
+        this.track = new Track();
+    }
+
+    /**
+     * Shows all tracks stored inside a TrackStore trckStr.
+     * @param trckStr
+     */
+    public void showAllTracks(TrackStore trckStr){
+        // FOR ALL STORED TRACKS
+        for(int a=0; a<trckStr.getTracks().size(); a++){
+            // SHOW THE TRACK AS POLYLINE ON THE MAP
+            this.showtrackedPoints(trckStr.getTracks().get(a));
+        }
+    }
+
     // GETTERS AND SETTERS
 
     /**
@@ -440,42 +480,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * Shows the tracked points of a Track t as a polyline.
-     * @param t
+     * Returns the boolean that indicates the location updates shall be requested or not.
+     * @return
      */
-    public void showtrackedPoints(Track t){
-        // CREATE POLYLINE OPTIONS
-        PolylineOptions polOpt = new PolylineOptions();
-        // SET THE COLOR
-        polOpt.color(Color.BLACK);
-        // FOR THE SIZE OF THE SAVED LATLNG
-        for(int a = 0; a < t.getLatLngs().size(); a++){
-            // ADD BASEPOINT TO THE POLYLINE
-            polOpt.add(t.getLatLngs().get(a));
-        }
-        // ADD POLYLINE TO THE MAP
-        this.mMap.addPolyline(polOpt);
+    public boolean ismRequestLocationUpdates() {
+        return mRequestLocationUpdates;
     }
 
     /**
-     * Shows all tracks stored inside a TrackStore locSt.
-     * @param locSt
+     * Returns the boolean that indicates the location updates shall be requested or not.
+     * @param mRequestLocationUpdates
      */
-    public void showAllTracks(TrackStore locSt){
-        for(int a=0; a<locSt.getTracks().size(); a++){
-            this.showtrackedPoints(locSt.getTracks().get(a));
-        }
+    public void setmRequestLocationUpdates(boolean mRequestLocationUpdates) {
+        this.mRequestLocationUpdates = mRequestLocationUpdates;
     }
-
-    /**
-     * Saves the Tracks inside the TrackStore locSt persistent to the database.
-     * @param locSt
-     */
-    public void saveToDB(TrackStore locSt){
-        // TODO : SPEICHERN DER TRACKS IN DEM LOCATIONSTORE OBJEKT
-        // TODO : BERECHNEN DER LAENGE DER TRACKS UND SPEICHERN DIESER LAENGE IN DER USER-PUNKTZAHL?
-
-    }
-
-
 }
