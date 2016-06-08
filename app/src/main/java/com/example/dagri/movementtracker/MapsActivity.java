@@ -206,8 +206,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             for(int b = 0; b < this.trackStore.getTracks().get(a).getLatLngs().size(); b++){
                 mailText = mailText + "lat=" + this.trackStore.getTracks().get(a).getLatLngs().get(b).latitude + " ";
                 mailText = mailText + "lon=" + this.trackStore.getTracks().get(a).getLatLngs().get(b).longitude + " ";
-                mailText = mailText + "time=" + this.trackStore.getTracks().get(a).getLatLngs().get(b).toString() + " ";
-                mailText = mailText + "time=" + this.trackStore.getTracks().get(a).getLatLngs().get(b).toString() + "\n";
+                mailText = mailText + "speed=" + this.trackStore.getTracks().get(a).getSpeeds().get(b).toString() + " ";
+                mailText = mailText + "time=" + this.trackStore.getTracks().get(a).getTimes().get(b).toString() + "\n";
             }
         }
         i.putExtra(Intent.EXTRA_TEXT, mailText);
@@ -428,7 +428,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     private void saveTrack(Track t) {
         // SAVE THE TRACK TO THE TRACKSTORE
-        this.trackStore.getTracks().add(t);
+        if(this.track.getLatLngs().size() > 0)
+            this.trackStore.getTracks().add(t);
         // EMPTY THE TRACK
         this.track = new Track();
     }
