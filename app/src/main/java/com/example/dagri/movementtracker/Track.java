@@ -5,9 +5,9 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 
 /**
- * Created by DaGri on 05.06.16.
+ * Created by DaGri on 08.06.16.
  */
-public class LocationStore {
+public class Track {
 
     // ATTRIBUTES
 
@@ -31,7 +31,8 @@ public class LocationStore {
     /**
      * Empty constructor.
      */
-    public LocationStore() {
+    public Track(){
+
     }
 
     // METHODS

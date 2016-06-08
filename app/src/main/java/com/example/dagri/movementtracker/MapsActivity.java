@@ -2,6 +2,7 @@ package com.example.dagri.movementtracker;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -74,14 +76,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private  int DISPLACEMENT = 10;
 
     /**
-     * The LocationStore to store the tracked locations inside.
+     * The TrackStore to store the tracked locations inside.
      */
-    private LocationStore locStore = new LocationStore();
+    private TrackStore locStore = new TrackStore();
 
     /**
      * TODO : KEIN PLAN
      */
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
+
+    /**
+     * TODO : JAVADOC
+     */
+    private Track track = new Track();
 
     /**
      * Overwritten OnCreate method.
@@ -194,13 +201,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         i.putExtra(Intent.EXTRA_SUBJECT, "subject of email");
         // CREATE THE STRING TO PUT INSIDE THE EMAIL
         String mailText = "";
-        for(int a=0;a < this.locStore.getLatLngs().size(); a++){
-            mailText = mailText + "lat=" + this.locStore.getLatLngs().get(a).latitude + " ";
-            mailText = mailText + "lon=" + this.locStore.getLatLngs().get(a).longitude + " ";
-            mailText = mailText + "time=" + this.locStore.getTimes().get(a).toString() + " ";
-            mailText = mailText + "time=" + this.locStore.getSpeeds().get(a).toString() + "\n";
+        for(int a=0;a < this.locStore.getTracks().size(); a++){
+            mailText = mailText + "Track : " + a + "\n";
+            for(int b = 0; b < this.locStore.getTracks().get(a).getLatLngs().size(); b++){
+                mailText = mailText + "lat=" + this.locStore.getTracks().get(a).getLatLngs().get(b).latitude + " ";
+                mailText = mailText + "lon=" + this.locStore.getTracks().get(a).getLatLngs().get(b).longitude + " ";
+                mailText = mailText + "time=" + this.locStore.getTracks().get(a).getLatLngs().get(b).toString() + " ";
+                mailText = mailText + "time=" + this.locStore.getTracks().get(a).getLatLngs().get(b).toString() + "\n";
+            }
         }
-        i.putExtra(Intent.EXTRA_TEXT   , mailText);
+        i.putExtra(Intent.EXTRA_TEXT, mailText);
         // TRYING TO OPEN AN EMAIL APPLICATION
         try {
             // OPEN THE DIALOG TO CHOOSE AN EMAIL APPLICATION
@@ -223,7 +233,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * Saves the current last known location to the LocationStore
+     * Saves the current last known location to the TrackStore
      */
     private void saveLocation() {
         // CHECK THE SDK VERSION
@@ -240,8 +250,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // CREATE THE STRING THAT SAVES THE TIME (DAY, MONTH, YEAR, HEOURS, MINUTES)
             DateFormat dateFormat = new SimpleDateFormat("ddMMyyyykkmm");
             String str = dateFormat.format(new Date());
-            // SAVE THE LOCATION TO THE LOCATION STORE
-            this.locStore.addData(mLastLocation.getLatitude(), mLastLocation.getLongitude(), str, mLastLocation.getSpeed());
+            // SAVE THE LOCATION TO THE TRACK STORE
+            this.track.addData(mLastLocation.getLatitude(), mLastLocation.getLongitude(), str, mLastLocation.getSpeed());
             // SHOW THE USER THAT THE POSITION HAS BEEN SAVED
             Toast.makeText(MapsActivity.this, "Location updated!", Toast.LENGTH_SHORT).show();
         }
@@ -302,6 +312,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     protected void stopLocationUpdates() {
        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiCient, (com.google.android.gms.location.LocationListener) this);
+        this.saveTrack(this.track);
+    }
+
+    /**
+     * Saves the Track t to the location store.
+     * @param t
+     */
+    private void saveTrack(Track t) {
+        this.locStore.getTracks().add(t);
     }
 
     /**
@@ -419,4 +438,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void setFastest_interval(int fastest_interval) {
         this.fastest_interval = fastest_interval;
     }
+
+    /**
+     * Shows the tracked points of a Track t as a polyline.
+     * @param t
+     */
+    public void showtrackedPoints(Track t){
+        // CREATE POLYLINE OPTIONS
+        PolylineOptions polOpt = new PolylineOptions();
+        // SET THE COLOR
+        polOpt.color(Color.BLACK);
+        // FOR THE SIZE OF THE SAVED LATLNG
+        for(int a = 0; a < t.getLatLngs().size(); a++){
+            // ADD BASEPOINT TO THE POLYLINE
+            polOpt.add(t.getLatLngs().get(a));
+        }
+        // ADD POLYLINE TO THE MAP
+        this.mMap.addPolyline(polOpt);
+    }
+
+    /**
+     * Shows all tracks stored inside a TrackStore locSt.
+     * @param locSt
+     */
+    public void showAllTracks(TrackStore locSt){
+        for(int a=0; a<locSt.getTracks().size(); a++){
+            this.showtrackedPoints(locSt.getTracks().get(a));
+        }
+    }
+
+    /**
+     * Saves the Tracks inside the TrackStore locSt persistent to the database.
+     * @param locSt
+     */
+    public void saveToDB(TrackStore locSt){
+        // TODO : SPEICHERN DER TRACKS IN DEM LOCATIONSTORE OBJEKT
+        // TODO : BERECHNEN DER LAENGE DER TRACKS UND SPEICHERN DIESER LAENGE IN DER USER-PUNKTZAHL?
+
+    }
+
+
 }
